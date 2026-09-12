@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1000 from Nepal: daily posting board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14213D; --soft:#5B6473; --line:#E1E6ED; --panel:#F4F6F9; --paper:#fff;
+    --red:#C8102E; --red-soft:#FCEBEE;
+    --li:#0A66C2; --li-soft:#E8F1FB; --x:#111; --x-soft:#EEEEEE; --ig:#C13584; --ig-soft:#FAE8F2; --rd:#FF4500; --rd-soft:#FFEEE6;
+    --build:#7C3AED; --build-soft:#F1EBFD;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+  h1,h2,h3,p{margin:0}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+  :focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+  .wrap{max-width:1300px;margin:0 auto;padding:18px 16px 60px}
+
+  /* top strip */
+  .top{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:flex-end;justify-content:space-between;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+  .top h1{font-size:clamp(26px,4.5vw,44px);font-weight:800;line-height:1.02;font-variation-settings:"opsz" 96;max-width:16ch}
+  .stats{display:flex;gap:22px}
+  .stat b{display:block;font-size:34px;font-weight:800;line-height:1}
+  .stat input{width:110px;font:inherit;font-size:34px;font-weight:800;line-height:1;border:0;border-bottom:2px dashed var(--line);padding:0;color:var(--red);background:transparent}
+  .stat input:focus{outline:0;border-bottom-color:var(--red)}
+  .stat span{font-size:13px;color:var(--soft)}
+  .track{height:6px;background:var(--panel);border-radius:3px;overflow:hidden;margin-top:12px}
+  .track i{display:block;height:100%;width:0;background:var(--red);transition:width .4s}
+  .sync{font-size:12px;color:var(--soft);margin-top:6px}
+
+  /* today panel */
+  .today{margin-top:22px;border:2px solid var(--red);border-radius:10px;overflow:hidden}
+  .today .head{background:var(--red);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+  .today .head h2{font-size:22px;font-weight:700}
+  .today .head span{font-size:13px;opacity:.9}
+  .today .head .jump{color:#fff;text-decoration:underline;font-size:13px}
+  .today .tags{padding:10px 16px 0;display:flex;gap:6px;flex-wrap:wrap}
+  .posts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0}
+  .post{padding:14px 16px;border-top:1px solid var(--line);display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start}
+  .post .ch{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:4px}
+  .post .ch i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .post .txt{font-size:15px}
+  .post.done .txt{color:var(--soft);text-decoration:line-through}
+  .post.quiet .txt{color:var(--soft)}
+  .post input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--red)}
+  @media (min-width:760px){.posts{grid-template-columns:1fr 1fr}.post:nth-child(odd){border-right:1px solid var(--line)}}
+
+  .tag{font-size:12px;padding:2px 8px;border-radius:4px;background:var(--build-soft);color:var(--build);font-weight:700}
+  .tag.plain{background:var(--panel);color:var(--soft)}
+
+  /* view switch */
+  .switch{display:flex;gap:8px;margin:26px 0 12px;align-items:center;flex-wrap:wrap}
+  .switch button{border:1px solid var(--line);padding:7px 14px;border-radius:999px;font-size:14px;font-weight:500}
+  .switch button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .legend{margin-left:auto;display:flex;gap:12px;font-size:12px;color:var(--soft);flex-wrap:wrap}
+  .legend span{display:inline-flex;gap:5px;align-items:center}
+  .legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+  /* board */
+  .board{display:flex;gap:10px;overflow-x:auto;padding:4px 4px 16px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .board::-webkit-scrollbar{height:8px}
+  .board::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  .col{flex:0 0 290px;scroll-snap-align:start;border:1px solid var(--line);border-radius:10px;background:var(--paper);display:flex;flex-direction:column}
+  .col.build{background:linear-gradient(var(--build-soft),var(--paper) 60px)}
+  .col.today{border:2px solid var(--red)}
+  .col.past{opacity:.6}
+  .col .date{padding:12px 14px 8px;display:flex;justify-content:space-between;align-items:baseline}
+  .col .date b{font-size:22px;font-weight:700}
+  .col .date b small{font-size:14px;font-weight:500;color:var(--soft);margin-left:6px}
+  .col.today .date b{color:var(--red)}
+  .col .date span{font-size:12px;color:var(--soft)}
+  .col .tags{padding:0 14px 8px;display:flex;gap:6px;flex-wrap:wrap}
+  .card{margin:0 10px 10px;border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:14px;line-height:1.4}
+  .card .ch{font-weight:700;font-size:12.5px;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+  .card .ch i{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .card input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--ink)}
+  .card.done .txt{color:var(--soft);text-decoration:line-through}
+  .card.quiet{opacity:.75}
+  .card.quiet .txt{color:var(--soft);font-size:13px}
+
+  /* month calendar */
+  .cal{display:none;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal.on{display:grid}
+  .dow{font-size:12px;color:var(--soft);text-align:center;padding:6px 0}
+  .cell{min-height:86px;border:1px solid var(--line);border-radius:8px;padding:8px;text-align:left;display:flex;flex-direction:column;gap:6px;background:var(--paper)}
+  .cell.off{border-style:dashed;color:var(--soft);background:transparent}
+  .cell.build{background:var(--build-soft)}
+  .cell.today{border:2px solid var(--red)}
+  .cell.today b{color:var(--red)}
+  .cell b{font-size:18px;font-weight:700;line-height:1}
+  .cell.off b{font-weight:500}
+  .dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto}
+  .dots i{width:14px;height:14px;border-radius:3px;display:inline-block;opacity:.25}
+  .dots i.live{opacity:1}
+  .cell .n{font-size:11px;color:var(--soft)}
+  @media (min-width:760px){.cell{min-height:120px}.cell b{font-size:22px}.dots i{width:18px;height:18px}}
+
+  /* assets */
+  .assets{margin-top:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:26px}
+  .assets h2{font-size:20px;font-weight:700;margin-bottom:6px}
+  .assets ul{list-style:none;margin:0;padding:0}
+  .assets li{padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+  .assets li b{display:block;font-weight:700}
+  .assets li span{color:var(--soft)}
+  @media (prefers-reduced-motion:reduce){.track i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>1000 registrations from Nepal by 25 Sep</h1>
+    <div class="stats">
+      <div class="stat"><input id="regCount" type="number" min="0" inputmode="numeric" aria-label="Registrations so far" value="0"><span>Nepal registrations</span></div>
+      <div class="stat"><b id="daysLeft">0</b><span>days left</span></div>
+      <div class="stat"><b id="liveCount">0</b><span>posts live of <span id="liveTotal">0</span></span></div>
+    </div>
+  </header>
+  <div class="track" aria-hidden="true"><i id="fill"></i></div>
+  <div class="sync" id="sync">Ticks and the count are shared with everyone who opens this board.</div>
+
+  <section class="today" id="todayPanel" aria-label="Going live today"></section>
+
+  <div class="switch" role="group" aria-label="View">
+    <button id="bBoard" aria-pressed="true">Day by day</button>
+    <button id="bCal" aria-pressed="false">Month</button>
+    <div class="legend">
+      <span><i style="background:var(--li)"></i>LinkedIn</span>
+      <span><i style="background:var(--x)"></i>X</span>
+      <span><i style="background:var(--ig)"></i>Instagram story</span>
+      <span><i style="background:var(--rd)"></i>Reddit</span>
+      <span><i style="background:var(--build)"></i>Buildstation</span>
+    </div>
+  </div>
+
+  <section class="board" id="board" aria-label="One column per day"></section>
+  <section class="cal" id="cal" aria-label="September calendar"></section>
+
+  <section class="assets">
+    <div>
+      <h2>Make once, use every day</h2>
+      <ul>
+        <li><b>Registration counter graphic</b><span>One template, number swapped daily, for X and stories.</span></li>
+        <li><b>60 second registration screen recording</b><span>For X on Mon 15, stories, and any Reddit comment asking how.</span></li>
+        <li><b>One short link for the whole campaign</b><span>Same link on every channel and every creator so the count is measurable.</span></li>
+        <li><b>Pinned Day 1 tweet</b><span>Quote it with the new count each day instead of posting fresh counters.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Rules for the fortnight</h2>
+      <ul>
+        <li><b>Reddit posts every second or third day</b><span>Rotate r/Nepal, r/NepalSocial, r/ITNepal, r/solana. Value post first, link in body or first comment. Off days are for answering questions in your own threads.</span></li>
+        <li><b>LinkedIn topic never repeats</b><span>Each day is a different reason to register.</span></li>
+        <li><b>Buildstation is live content, 16 to 20 Sep</b><span>Photos and headcounts go out the same day. Demo Day is Sun 20, recap on Mon 21.</span></li>
+        <li><b>Local track amount</b><span>Shown as Rs. X lakhs until it is confirmed.</span></li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const CH = {
+  linkedin:{name:"LinkedIn", c:"var(--li)", s:"var(--li-soft)"},
+  x:{name:"X", c:"var(--x)", s:"var(--x-soft)"},
+  ig:{name:"Instagram story", c:"var(--ig)", s:"var(--ig-soft)"},
+  reddit:{name:"Reddit", c:"var(--rd)", s:"var(--rd-soft)"}
+};
+const QUIET = "Comment day. Answer questions in your own threads. No new post.";
+const DAYS = [
+ {d:"2026-09-13", tags:[], posts:{
+  linkedin:"Launch the push. The world's largest online hackathon, a $250K pre-seed accelerator at the end, and you can enter from any district in Nepal. State the 1000 target openly.",
+  x:"Pin it: \"1000 registrations from Nepal by 25 Sep. Day 1.\" Quote this tweet daily with the updated count.",
+  ig:"Countdown sticker to 25 Sep, poll \"Registered yet?\", link sticker.",
+  reddit:"r/ITNepal: what the hackathon is, who can join, why it matters for Nepali devs."}},
+ {d:"2026-09-14", tags:[], quiet:["reddit"], posts:{
+  linkedin:"The local track. Rs. X lakhs reserved for Nepali teams, judged against Nepal only. How a first hackathon team wins money without beating the world.",
+  x:"Break the local prize into what it buys a student team: six months of runway, laptops, a first salary.",
+  ig:"Text graphic \"Rs. X lakhs. Nepal only.\" with link sticker.",
+  reddit:QUIET}},
+ {d:"2026-09-15", tags:[], posts:{
+  linkedin:"Buildstation starts tomorrow. Five days at Draper Startup House, free, funded founders in the room, Demo Day on Sun 20. Registering for the hackathon is the entry ticket.",
+  x:"Screen recording of the registration flow, under 60 seconds, captioned \"Takes less time than ordering momo.\" Then a thread of what each Buildstation day looks like, ending with \"register, then walk in.\"",
+  ig:"Repost the screen recording as a story, link sticker on the last frame. Venue walkthrough and Q&A box \"What should we cover this week?\"",
+  reddit:"r/NepalSocial: Nepal was number one in the world for hackathon registrations per internet user last cycle. Frame it as \"Nepal is doing something unusual here.\""}},
+ {d:"2026-09-16", tags:["Buildstation day 1"], quiet:["reddit"], posts:{
+  linkedin:"Nepal was number one for hackathon registrations per internet user last cycle. This cycle we want the absolute number, not just the ratio. Buildstation opens today.",
+  x:"Live tweets from Buildstation day one: headcount, first ideas on the whiteboard, current registration count.",
+  ig:"Behind the scenes, first teams forming, running counter of registrations.",
+  reddit:QUIET}},
+ {d:"2026-09-17", tags:["Buildstation day 2"], posts:{
+  linkedin:"Proof from the last cycle. Three things Nepali teams shipped in previous hackathons and where they are now (Janamat included).",
+  x:"Day two from the room: one team, one idea, one photo. Quote the pinned tweet with the count.",
+  ig:"Team intros in 15 second clips, link sticker.",
+  reddit:"r/Nepal: \"Nepali teams built these at the last global hackathon\" with links to the live products. Hackathon link in the body."}},
+ {d:"2026-09-18", tags:["Buildstation day 3","Co-working Friday"], posts:{
+  linkedin:"Five problems in Nepal a first team could build on Solana in four weeks: remittance, tourist payments, land records, cooperative lending, transparent relief funds. Two lines each.",
+  x:"Swikar stream announcement with restream links and a clip from his viral voting app reel. Start the \"one idea a day\" tweet series from the LinkedIn list, running till the 25th.",
+  ig:"Stream reminder, then live restream frames with the link sticker. Poll between two of the ideas: \"Which would you build?\"",
+  reddit:"r/solana: \"Kathmandu has five days of builders in one room right now\" with photos and the Nepal angle."}},
+ {d:"2026-09-19", tags:["Buildstation day 4"], quiet:["reddit"], posts:{
+  linkedin:"Myths that stop people registering. You need a team. You need Rust. You need to be in Kathmandu. You need a finished idea. Each answered in one line.",
+  x:"Photo dump from Buildstation day four, number of builders, number of teams, current count.",
+  ig:"What the founders told the teams, in three text frames over room photos.",
+  reddit:QUIET}},
+ {d:"2026-09-20", tags:["Buildstation Demo Day"], quiet:["reddit"], posts:{
+  linkedin:"Buildstation in numbers. Builders in the room, teams formed, what changed in the ideas since Wednesday, and Demo Day happening today.",
+  x:"Live from Demo Day: one tweet per team as it presents. Short video of the best demo moment, captioned \"Registered on Monday. Demoed on Sunday.\"",
+  ig:"Demo Day highlights as they happen. Closing frame: \"Next Demo Day is yours.\" Link sticker.",
+  reddit:QUIET}},
+ {d:"2026-09-21", tags:[], posts:{
+  linkedin:"Demo Day recap. Every team that presented, one line each on what they built, and the point that every one of them registered a week ago knowing nothing.",
+  x:"Recap thread of the demos with clips. Count update.",
+  ig:"Recap reel reshare, poll \"Which demo would you fund?\"",
+  reddit:"r/NepalSocial: Demo Day recap with the team list and photos."}},
+ {d:"2026-09-22", tags:[], quiet:["reddit"], posts:{
+  linkedin:"The brain drain post. Nepal exports its best engineers every year. This hackathon pays them to build the same quality product from home. Launch the video creator bounty here if prizes are locked.",
+  x:"Bounty announcement: the two required parts of the video, the prize, the deadline.",
+  ig:"Bounty explainer in three frames, link sticker.",
+  reddit:QUIET}},
+ {d:"2026-09-23", tags:[], posts:{
+  linkedin:"Anybody Can Dev. Post the first episode (Anil Keshary Shah or Wangden Sherpa building an app in under three minutes). If he can, a CSIT student can.",
+  x:"The reel itself, quote tweeted with \"Your turn.\" Count update.",
+  ig:"Reel reshare, poll \"Could you do this in 3 minutes?\"",
+  reddit:"r/Nepal: the reel, framed as a banker learning blockchain, hackathon link in the body."}},
+ {d:"2026-09-24", tags:[], quiet:["reddit"], posts:{
+  linkedin:"What a registrant gets from Superteam Nepal for the next three weeks: Co-working Fridays in five cities, weekly build streams, community call alphas, founder office hours, help finding a team.",
+  x:"Second Swikar stream announcement plus the count.",
+  ig:"City by city Co-working Friday schedule for tomorrow, link sticker.",
+  reddit:QUIET}},
+ {d:"2026-09-25", tags:["Co-working Friday","Target day"], posts:{
+  linkedin:"The last stretch. Publish the exact count, the gap to 1000, and a direct ask to every reader to send the link to one person who builds.",
+  x:"Hourly count updates through the day, each one a quote of the pinned Day 1 tweet.",
+  ig:"Countdown to midnight, share sticker prompt \"send this to one builder.\"",
+  reddit:"r/ITNepal short post: \"We are X short of 1000 Nepali registrations. Closing the gap today.\""}},
+ {d:"2026-09-26", tags:["Buffer day"], quiet:["reddit"], posts:{
+  linkedin:"Either the 1000 announcement with the number in the hook and the Nepal flag, or the honest count and the commitment to hit it before 12 Oct.",
+  x:"Same, plus thanks to Swikar, Sisan, and the Anybody Can Dev guests.",
+  ig:"The number, full screen.",
+  reddit:QUIET}}
+];
+
+const KEY="hackathon-push-progress-v3";
+let state={done:{},regCount:0}, memoryOnly=false, selected=null;
+
+let live=null;
+async function load(){
+  try{ if(window.storage){ const r=await window.storage.get(KEY,true); if(r&&r.value) state=Object.assign(state,JSON.parse(r.value)); }
+       else { const r=localStorage.getItem(KEY); if(r) state=Object.assign(state,JSON.parse(r)); memoryOnly=true; } }
+  catch(e){ memoryOnly=true; }
+  try{ const r=await fetch("regs.json?t="+Date.now()); if(r.ok){ live=await r.json(); if(typeof live.nepal==="number") state.regCount=live.nepal; } }catch(e){}
+  const el=document.getElementById("sync");
+  if(live&&live.updatedAt){ el.textContent="Nepal count pulled from colosseum.com/analytics, updated "+new Date(live.updatedAt).toLocaleString("en-GB",{timeZone:"Asia/Kathmandu",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+" NPT, total "+live.total+" registrations worldwide. Ticks save on this device."; }
+  else if(memoryOnly) el.textContent="Count not fetched yet, type it in. Ticks save on this device.";
+}
+async function save(){
+  try{ if(window.storage&&!memoryOnly) await window.storage.set(KEY,JSON.stringify(state),true); else localStorage.setItem(KEY,JSON.stringify(state)); }
+  catch(e){ document.getElementById("sync").textContent="Could not save. Try the tick again."; }
+}
+
+const pad=n=>String(n).padStart(2,"0");
+const todayISO=()=>{const t=new Date();return t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());};
+const fmt=d=>{const t=new Date(d+"T00:00:00");return{dow:t.toLocaleDateString("en-GB",{weekday:"short"}),dowL:t.toLocaleDateString("en-GB",{weekday:"long"}),day:t.getDate(),mon:t.toLocaleDateString("en-GB",{month:"short"})};};
+const k=(d,c)=>d+":"+c;
+const quiet=(day,c)=>(day.quiet||[]).includes(c);
+const isBuild=day=>day.tags.some(t=>/Buildstation/.test(t));
+const prog=day=>{const cs=Object.keys(day.posts).filter(c=>!quiet(day,c));return{n:cs.filter(c=>state.done[k(day.d,c)]).length,t:cs.length};};
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+function postHTML(day,c,cls){
+  const q=quiet(day,c), done=state.done[k(day.d,c)];
+  return `<div class="${cls} ${done?"done":""} ${q?"quiet":""}" style="${cls==="card"?`background:${CH[c].s}`:""}">
+    ${q?`<span></span>`:`<input type="checkbox" data-k="${k(day.d,c)}" ${done?"checked":""} aria-label="${CH[c].name} live on ${fmt(day.d).dow} ${fmt(day.d).day}">`}
+    <div><div class="ch" style="color:${CH[c].c}"><i style="background:${CH[c].c}"></i>${CH[c].name}</div><div class="txt">${esc(day.posts[c])}</div></div>
+  </div>`;
+}
+function tagsHTML(day){return day.tags.map(t=>`<span class="tag ${/Buildstation/.test(t)?"":"plain"}">${t}</span>`).join("");}
+
+function renderTop(){
+  const t=new Date(todayISO()+"T00:00:00"), end=new Date("2026-09-25T00:00:00");
+  document.getElementById("daysLeft").textContent=Math.max(0,Math.round((end-t)/864e5));
+  const c=Math.max(0,Number(state.regCount)||0);
+  document.getElementById("regCount").value=c;
+  document.getElementById("fill").style.width=Math.min(100,c/10)+"%";
+  let n=0,tt=0; DAYS.forEach(d=>{const p=prog(d);n+=p.n;tt+=p.t;});
+  document.getElementById("liveCount").textContent=n; document.getElementById("liveTotal").textContent=tt;
+}
+
+function renderToday(){
+  const today=todayISO();
+  const d=selected||today;
+  let day=DAYS.find(x=>x.d===d);
+  const el=document.getElementById("todayPanel");
+  if(!day){
+    const first=DAYS[0], last=DAYS[DAYS.length-1];
+    el.innerHTML=`<div class="head"><h2>${d<first.d?"The push starts Sun 13 Sep":"The push has ended"}</h2><span>${d<first.d?"Nothing scheduled today.":"Registration stays open till 12 Oct."}</span></div>`;
+    return;
+  }
+  const f=fmt(day.d), p=prog(day), isToday=day.d===today;
+  el.innerHTML=`<div class="head"><h2>${isToday?"Going live today":"Selected day"}: ${f.dowL} ${f.day} ${f.mon}</h2><span>${p.n} of ${p.t} live</span>${isToday?"":`<button class="jump" id="backToday">Back to today</button>`}</div>
+    ${day.tags.length?`<div class="tags">${tagsHTML(day)}</div>`:""}
+    <div class="posts">${Object.keys(day.posts).map(c=>postHTML(day,c,"post")).join("")}</div>`;
+  bind(el);
+  const b=el.querySelector("#backToday"); if(b) b.onclick=()=>{selected=null;renderAll();scrollBoardTo(today);};
+}
+
+function renderBoard(){
+  const today=todayISO(), board=document.getElementById("board");
+  board.innerHTML=DAYS.map(day=>{
+    const f=fmt(day.d), p=prog(day);
+    return `<div class="col ${isBuild(day)?"build":""} ${day.d===today?"today":""} ${day.d<today?"past":""}" id="col-${day.d}">
+      <div class="date"><b>${f.dow} ${f.day}<small>${f.mon}</small></b><span>${day.d===today?"today":p.n+" of "+p.t+" live"}</span></div>
+      ${day.tags.length?`<div class="tags">${tagsHTML(day)}</div>`:""}
+      ${Object.keys(day.posts).map(c=>postHTML(day,c,"card")).join("")}
+    </div>`;
+  }).join("");
+  bind(board);
+}
+function scrollBoardTo(d){
+  const col=document.getElementById("col-"+d); const board=document.getElementById("board");
+  if(col) board.scrollTo({left:col.offsetLeft-board.offsetLeft-4,behavior:"smooth"});
+}
+
+function renderCal(){
+  const cal=document.getElementById("cal"), today=todayISO();
+  let html=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("");
+  const first=new Date("2026-09-01T00:00:00"); const start=first.getDay();
+  for(let i=0;i<start;i++) html+=`<div></div>`;
+  for(let n=1;n<=30;n++){
+    const d="2026-09-"+pad(n); const day=DAYS.find(x=>x.d===d);
+    if(!day){ html+=`<div class="cell off ${d===today?"today":""}"><b>${n}</b></div>`; continue; }
+    const p=prog(day);
+    html+=`<button class="cell ${isBuild(day)?"build":""} ${d===today?"today":""}" data-d="${d}" aria-label="${fmt(d).dowL} ${n} September, ${p.n} of ${p.t} live">
+      <b>${n}</b>
+      <div class="dots">${Object.keys(day.posts).map(c=>`<i style="background:${CH[c].c}" class="${state.done[k(d,c)]||quiet(day,c)?"live":""}"></i>`).join("")}</div>
+      <div class="n">${day.tags[0]||""}</div>
+    </button>`;
+  }
+  cal.innerHTML=html;
+  cal.querySelectorAll(".cell[data-d]").forEach(b=>b.onclick=()=>{selected=b.dataset.d;renderToday();window.scrollTo({top:document.getElementById("todayPanel").offsetTop-10,behavior:"smooth"});});
+}
+
+function bind(root){
+  root.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=async()=>{
+    if(cb.checked) state.done[cb.dataset.k]=true; else delete state.done[cb.dataset.k];
+    await save(); renderAll();
+  });
+}
+function setView(v){
+  document.getElementById("board").style.display=v==="board"?"flex":"none";
+  document.getElementById("cal").classList.toggle("on",v==="cal");
+  document.getElementById("bBoard").setAttribute("aria-pressed",v==="board");
+  document.getElementById("bCal").setAttribute("aria-pressed",v==="cal");
+}
+document.getElementById("bBoard").onclick=()=>setView("board");
+document.getElementById("bCal").onclick=()=>setView("cal");
+
+let timer;
+document.getElementById("regCount").oninput=e=>{state.regCount=Number(e.target.value)||0;renderTop();clearTimeout(timer);timer=setTimeout(save,600);};
+
+function renderAll(){renderTop();renderToday();renderBoard();renderCal();}
+load().then(()=>{renderAll();setTimeout(()=>scrollBoardTo(todayISO()),50);});
+</script>
+</body>
+</html>
