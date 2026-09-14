@@ -33,6 +33,14 @@
   .track i{display:block;height:100%;width:0;background:var(--red);transition:width .4s}
   .sync{font-size:12px;color:var(--soft);margin-top:6px}
 
+  /* pace */
+  .pace{margin-top:14px}
+  .pace .figs{display:flex;flex-wrap:wrap;gap:12px 28px}
+  .pace .verdict{margin-top:10px;font-size:15px;font-weight:700;color:var(--red)}
+  .pace .verdict.hot,.pace .verdict.good{display:inline-block;padding:6px 10px;border-radius:6px;color:#fff}
+  .pace .verdict.hot{background:var(--red)}
+  .pace .verdict.good{background:var(--em)}
+
   /* today panel */
   .today{margin-top:22px;border:2px solid var(--red);border-radius:10px;overflow:hidden}
   .today .head{background:var(--red);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
@@ -122,6 +130,17 @@
     </div>
   </header>
   <div class="track" aria-hidden="true"><i id="fill"></i></div>
+
+  <div class="pace" id="pace" hidden aria-label="Pace against the 1000 target">
+    <div class="figs">
+      <div class="stat"><b id="pToday">&ndash;</b><span>added today</span></div>
+      <div class="stat"><b id="pYesterday">&ndash;</b><span>added yesterday</span></div>
+      <div class="stat"><b id="pNeeded">&ndash;</b><span>needed per day</span></div>
+      <div class="stat"><b id="pProjected">&ndash;</b><span>projected finish</span></div>
+    </div>
+    <p class="verdict" id="paceLine" hidden></p>
+  </div>
+
   <div class="sync" id="sync">Ticks and the count are shared with everyone who opens this board.</div>
 
   <section class="today" id="todayPanel" aria-label="Going live today"></section>
@@ -286,6 +305,74 @@ function postHTML(day,c,cls){
 }
 function tagsHTML(day){return day.tags.map(t=>`<span class="tag ${/Buildstation/.test(t)?"":"plain"}">${t}</span>`).join("");}
 
+/* ---- pace. every date here is a calendar day in Asia/Kathmandu ---- */
+const TARGET=1000, TARGET_DAY="2026-09-25";
+const nptFmt=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kathmandu",year:"numeric",month:"2-digit",day:"2-digit"});
+const isDay=d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d);
+const nptToday=()=>{try{const d=nptFmt.format(new Date());return isDay(d)?d:null;}catch(e){return null;}};
+const dayNo=d=>isDay(d)?Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10))/864e5:null;
+const dayGap=(a,b)=>{const x=dayNo(a),y=dayNo(b);return (x===null||y===null)?null:y-x;};
+const dayAdd=(d,n)=>{const v=dayNo(d);return v===null?null:new Date((v+n)*864e5).toISOString().slice(0,10);};
+const num=v=>typeof v==="number"&&isFinite(v)?v:null;
+
+/* history holds several rows a day. Keep the last row of each date, sorted. */
+function dailySeries(hist,today,current){
+  const m=new Map();
+  if(Array.isArray(hist)) for(const row of hist){
+    if(!Array.isArray(row)||row.length<2) continue;
+    const d=row[0], v=num(Number(row[1]));
+    if(isDay(d)&&v!==null) m.set(d,v);
+  }
+  if(today&&current!==null) m.set(today,current); // regs.json nepal is the newest reading
+  return [...m.entries()].sort((a,b)=>dayNo(a[0])-dayNo(b[0]));
+}
+
+function computePace(){
+  const current=num(live&&live.nepal), today=nptToday();
+  if(current===null||!today) return null;
+  const series=dailySeries(live&&live.history,today,current);
+  const lastOn=d=>{const e=series.find(x=>x[0]===d);return e?e[1]:null;};
+  const lastBefore=d=>{const n=dayNo(d);let v=null;for(const e of series){if(dayNo(e[0])<n) v=e[1]; else break;}return v;};
+
+  const beforeToday=lastBefore(today);
+  const addedToday=beforeToday===null?null:current-beforeToday;
+  const y=dayAdd(today,-1), onY=y===null?null:lastOn(y), beforeY=y===null?null:lastBefore(y);
+  const addedYesterday=(onY===null||beforeY===null)?null:onY-beforeY;
+
+  const left=Math.max(0,dayGap(today,TARGET_DAY)||0), gap=Math.max(0,TARGET-current);
+  const needed=left>0?gap/left:gap;
+
+  /* trailing three day average: total gain over the last three recorded
+     steps, spread across the calendar days they actually cover */
+  let rate=null;
+  if(series.length>1){
+    const a=series[Math.max(0,series.length-4)], b=series[series.length-1], span=dayGap(a[0],b[0]);
+    if(span&&span>0) rate=(b[1]-a[1])/span;
+  }
+  const projected=rate===null?null:Math.round(current+rate*left);
+  const multiple=rate===null||rate<=0?Infinity:needed/rate;
+  return {addedToday,addedYesterday,needed:Math.ceil(needed),projected,rate,multiple};
+}
+
+function renderPace(){
+  const box=document.getElementById("pace"), line=document.getElementById("paceLine");
+  let p=null;
+  try{ p=computePace(); }catch(e){ p=null; }
+  if(!p){ box.hidden=true; return; }
+  box.hidden=false;
+  const delta=v=>v===null?"\u2013":(v>=0?"+":"\u2212")+Math.abs(v);
+  document.getElementById("pToday").textContent=delta(p.addedToday);
+  document.getElementById("pYesterday").textContent=delta(p.addedYesterday);
+  document.getElementById("pNeeded").textContent=p.needed;
+  document.getElementById("pProjected").textContent=p.projected===null?"\u2013":p.projected;
+  line.className="verdict";
+  if(p.rate===null||p.projected===null){ line.hidden=true; return; }
+  line.hidden=false;
+  line.textContent="Running at "+Math.round(p.rate)+" a day. Need "+p.needed+". On track for "+p.projected+".";
+  if(p.multiple>=2) line.classList.add("hot");
+  else if(p.multiple<1.2) line.classList.add("good");
+}
+
 function renderTop(){
   const t=new Date(todayISO()+"T00:00:00"), end=new Date("2026-09-25T00:00:00");
   document.getElementById("daysLeft").textContent=Math.max(0,Math.round((end-t)/864e5));
@@ -368,7 +455,7 @@ document.getElementById("bCal").onclick=()=>setView("cal");
 let timer;
 document.getElementById("regCount").oninput=e=>{state.regCount=Number(e.target.value)||0;renderTop();clearTimeout(timer);timer=setTimeout(save,600);};
 
-function renderAll(){renderTop();renderToday();renderBoard();renderCal();}
+function renderAll(){renderTop();renderPace();renderToday();renderBoard();renderCal();}
 load().then(()=>{renderAll();setTimeout(()=>scrollBoardTo(todayISO()),50);});
 </script>
 </body>
