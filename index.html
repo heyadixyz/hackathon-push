@@ -21,6 +21,9 @@
 
   .wrap{max-width:1300px;margin:0 auto;padding:18px 16px 60px}
 
+  /* stale count */
+  .stale{background:var(--red);color:#fff;font-size:14px;font-weight:700;padding:9px 14px;border-radius:8px;margin-bottom:14px}
+
   /* top strip */
   .top{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:flex-end;justify-content:space-between;padding-bottom:14px;border-bottom:2px solid var(--ink)}
   .top h1{font-size:clamp(26px,4.5vw,44px);font-weight:800;line-height:1.02;font-variation-settings:"opsz" 96;max-width:16ch}
@@ -135,6 +138,8 @@
 </head>
 <body>
 <div class="wrap">
+
+  <div class="stale" id="stale" role="status" hidden></div>
 
   <header class="top">
     <h1>1000 registrations from Nepal by 25 Sep</h1>
@@ -296,7 +301,7 @@ async function load(){
   catch(e){ memoryOnly=true; }
   try{ const r=await fetch("regs.json?t="+Date.now()); if(r.ok){ live=await r.json(); if(typeof live.nepal==="number") state.regCount=live.nepal; } }catch(e){}
   const el=document.getElementById("sync");
-  if(live&&live.updatedAt){ el.textContent="Nepal count pulled from colosseum.com/analytics, updated "+new Date(live.updatedAt).toLocaleString("en-GB",{timeZone:"Asia/Kathmandu",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+" NPT, total "+live.total+" registrations worldwide. Ticks save on this device."; }
+  if(live&&live.updatedAt){ el.textContent="Nepal count pulled from colosseum.com/analytics, updated "+nptTime(new Date(live.updatedAt))+" NPT, total "+live.total+" registrations worldwide. Ticks save on this device."; }
   else if(memoryOnly) el.textContent="Count not fetched yet, type it in. Ticks save on this device.";
 }
 async function save(){
@@ -304,6 +309,10 @@ async function save(){
   catch(e){ document.getElementById("sync").textContent="Could not save. Try the tick again."; }
 }
 
+const nptTime=d=>{
+  try{ return d.toLocaleString("en-GB",{timeZone:"Asia/Kathmandu",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); }
+  catch(e){ return d.toISOString().slice(0,16).replace("T"," "); }
+};
 const pad=n=>String(n).padStart(2,"0");
 const todayISO=()=>{const t=new Date();return t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());};
 const fmt=d=>{const t=new Date(d+"T00:00:00");return{dow:t.toLocaleDateString("en-GB",{weekday:"short"}),dowL:t.toLocaleDateString("en-GB",{weekday:"long"}),day:t.getDate(),mon:t.toLocaleDateString("en-GB",{month:"short"})};};
@@ -388,6 +397,20 @@ function renderPace(){
   line.textContent="Running at "+Math.round(p.rate)+" a day. Need "+p.needed+". On track for "+p.projected+".";
   if(p.multiple>=2) line.classList.add("hot");
   else if(p.multiple<1.2) line.classList.add("good");
+}
+
+/* the scrape runs every two hours, so six hours without one is a broken feed */
+const STALE_MS=6*60*60*1000;
+function renderStale(){
+  const el=document.getElementById("stale");
+  let when=null;
+  try{
+    const t=live&&live.updatedAt?Date.parse(live.updatedAt):NaN;
+    if(isFinite(t)&&Date.now()-t>STALE_MS) when=nptTime(new Date(t));
+  }catch(e){ when=null; }
+  if(!when){ el.hidden=true; el.textContent=""; return; }
+  el.hidden=false;
+  el.textContent="Count is stale. Last pulled "+when+" NPT.";
 }
 
 /* top ten countries. Absent from regs.json on the old scrape shape, so hide it all. */
@@ -495,7 +518,7 @@ document.getElementById("bCal").onclick=()=>setView("cal");
 let timer;
 document.getElementById("regCount").oninput=e=>{state.regCount=Number(e.target.value)||0;renderTop();clearTimeout(timer);timer=setTimeout(save,600);};
 
-function renderAll(){renderTop();renderPace();renderRanks();renderToday();renderBoard();renderCal();}
+function renderAll(){renderStale();renderTop();renderPace();renderRanks();renderToday();renderBoard();renderCal();}
 load().then(()=>{renderAll();setTimeout(()=>scrollBoardTo(todayISO()),50);});
 </script>
 </body>
