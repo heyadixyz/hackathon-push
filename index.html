@@ -95,12 +95,21 @@
   .col.build{background:linear-gradient(var(--build-soft),var(--paper) 60px)}
   .col.today{border:2px solid var(--red)}
   .col.past{opacity:.6}
+  .col.lever{border-left:4px solid var(--build)}
   .col .date{padding:12px 14px 8px;display:flex;justify-content:space-between;align-items:baseline}
   .col .date b{font-size:22px;font-weight:700}
   .col .date b small{font-size:14px;font-weight:500;color:var(--soft);margin-left:6px}
   .col.today .date b{color:var(--red)}
   .col .date span{font-size:12px;color:var(--soft)}
   .col .tags{padding:0 14px 8px;display:flex;gap:6px;flex-wrap:wrap}
+  .pills{display:flex;gap:6px;flex-wrap:wrap}
+  .col .pills{padding:0 14px 8px}
+  #todayPanel .pills{padding:10px 16px 0}
+  #todayPanel.lever{border-left:4px solid var(--build)}
+  .pill{font-size:12px;font-weight:700;line-height:1.35;padding:3px 9px;border-radius:999px;color:#fff}
+  .pill.ev{background:var(--li)}
+  .pill.lx{background:var(--build)}
+
   .card{margin:0 10px 10px;border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:14px;line-height:1.4}
   .card .ch{font-weight:700;font-size:12.5px;margin-bottom:2px;display:flex;align-items:center;gap:6px}
   .card .ch i{width:10px;height:10px;border-radius:2px;display:inline-block}
@@ -215,12 +224,12 @@ const CH = {
 };
 const QUIET = "Comment day. Answer questions in your own threads. No new post.";
 const DAYS = [
- {d:"2026-09-13", tags:[], posts:{
+ {d:"2026-09-13", tags:[], events:["Coffee Morning"], posts:{
   linkedin:"Launch the push. The world's largest online hackathon, a $250K pre-seed accelerator at the end, and you can enter from any district in Nepal. State the 1000 target openly.",
   x:"Pin it: \"1000 registrations from Nepal by 25 Sep. Day 1.\" Quote this tweet daily with the updated count.",
   ig:"Countdown sticker to 25 Sep, poll \"Registered yet?\", link sticker.",
   reddit:"r/ITNepal: what the hackathon is, who can join, why it matters for Nepali devs."}},
- {d:"2026-09-14", tags:[], quiet:["reddit"], posts:{
+ {d:"2026-09-14", tags:[], events:["Opening Mixer, Birtamode, with MMC BSc CSIT Association"], quiet:["reddit"], posts:{
   linkedin:"The local track. Rs. X lakhs reserved for Nepali teams, judged against Nepal only. How a first hackathon team wins money without beating the world.",
   x:"Break the local prize into what it buys a student team: six months of runway, laptops, a first salary.",
   ig:"Text graphic \"Rs. X lakhs. Nepal only.\" with link sticker.",
@@ -230,40 +239,49 @@ const DAYS = [
   x:"Screen recording of the registration flow, under 60 seconds, captioned \"Takes less time than ordering momo.\" Then a thread of what each Buildstation day looks like, ending with \"register, then walk in.\"",
   ig:"Repost the screen recording as a story, link sticker on the last frame. Venue walkthrough and Q&A box \"What should we cover this week?\"",
   reddit:"r/NepalSocial: Nepal was number one in the world for hackathon registrations per internet user last cycle. Frame it as \"Nepal is doing something unusual here.\""}},
- {d:"2026-09-16", tags:["Buildstation day 1"], quiet:["reddit"], posts:{
+ {d:"2026-09-16", tags:["Buildstation day 1"],
+  events:["Buildstation day 1, Draper Startup House",
+          "Opening Mixer, Chitwan, High Five Restaurant Bharatpur"], quiet:["reddit"], posts:{
   linkedin:"Nepal was number one for hackathon registrations per internet user last cycle. This cycle we want the absolute number, not just the ratio. Buildstation opens today.",
   x:"Live tweets from Buildstation day one: headcount, first ideas on the whiteboard, current registration count.",
   ig:"Behind the scenes, first teams forming, running counter of registrations.",
   reddit:QUIET}},
- {d:"2026-09-17", tags:["Buildstation day 2"], posts:{
+ {d:"2026-09-17", tags:["Buildstation day 2"],
+  events:["Buildstation day 2, Draper Startup House"],
+  launch:["Swikar main announcement goes live"], posts:{
   linkedin:"Proof from the last cycle. Three things Nepali teams shipped in previous hackathons and where they are now (Janamat included).",
   x:"Day two from the room: one team, one idea, one photo. Quote the pinned tweet with the count.",
   ig:"Team intros in 15 second clips, link sticker.",
   reddit:"r/Nepal: \"Nepali teams built these at the last global hackathon\" with links to the live products. Hackathon link in the body."}},
- {d:"2026-09-18", tags:["Buildstation day 3","Co-working Friday"], posts:{
+ {d:"2026-09-18", tags:["Buildstation day 3","Co-working Friday"],
+  events:["Buildstation day 3, Draper Startup House",
+          "Opening Mixer, Jhapa",
+          "Opening Mixer, Birgunj, with Adarsh Gupta and Prince Yadav"], posts:{
   linkedin:"Five problems in Nepal a first team could build on Solana in four weeks: remittance, tourist payments, land records, cooperative lending, transparent relief funds. Two lines each.",
-  x:"Swikar stream announcement with restream links and a clip from his viral voting app reel. Start the \"one idea a day\" tweet series from the LinkedIn list, running till the 25th.",
+  x:"Swikar's stream goes live, with restream links and a clip from his viral voting app reel. Start the \"one idea a day\" tweet series from the LinkedIn list, running till the 25th.",
   ig:"Stream reminder, then live restream frames with the link sticker. Poll between two of the ideas: \"Which would you build?\"",
   reddit:"r/solana: \"Kathmandu has five days of builders in one room right now\" with photos and the Nepal angle."}},
- {d:"2026-09-19", tags:["Buildstation day 4"], quiet:["reddit"], posts:{
+ {d:"2026-09-19", tags:["Buildstation day 4"],
+  events:["Buildstation day 4, Draper Startup House"], quiet:["reddit"], posts:{
   linkedin:"Myths that stop people registering. You need a team. You need Rust. You need to be in Kathmandu. You need a finished idea. Each answered in one line.",
   x:"Photo dump from Buildstation day four, number of builders, number of teams, current count.",
   ig:"What the founders told the teams, in three text frames over room photos.",
   reddit:QUIET,
   email:"City mixer invites, segmented by city. Jhapa, Pokhara, Butwal. Registration link above the fold, mixer date below it."}},
- {d:"2026-09-20", tags:["Buildstation Demo Day"], quiet:["reddit"], posts:{
+ {d:"2026-09-20", tags:["Buildstation Demo Day"],
+  events:["Buildstation Demo Day, Draper Startup House"], quiet:["reddit"], posts:{
   linkedin:"Buildstation in numbers. Builders in the room, teams formed, what changed in the ideas since Wednesday, and Demo Day happening today.",
   x:"Live from Demo Day: one tweet per team as it presents. Short video of the best demo moment, captioned \"Registered on Monday. Demoed on Sunday.\"",
   ig:"Demo Day highlights as they happen. Closing frame: \"Next Demo Day is yours.\" Link sticker.",
   reddit:QUIET}},
  {d:"2026-09-21", tags:[], posts:{
-  linkedin:"Demo Day recap. Every team that presented, one line each on what they built, and the point that every one of them registered a week ago knowing nothing.",
-  x:"Recap thread of the demos with clips. Count update.",
+  linkedin:"Demo Day recap. Every team that presented, one line each on what they built, and the point that every one of them registered a week ago knowing nothing. Launch the video creator bounty at the end of the post if prizes are locked.",
+  x:"Recap thread of the demos with clips, closing on the bounty announcement: the two required parts of the video, the prize, the deadline. Count update.",
   ig:"Recap reel reshare, poll \"Which demo would you fund?\"",
   reddit:"r/NepalSocial: Demo Day recap with the team list and photos."}},
- {d:"2026-09-22", tags:[], quiet:["reddit"], posts:{
-  linkedin:"The brain drain post. Nepal exports its best engineers every year. This hackathon pays them to build the same quality product from home. Launch the video creator bounty here if prizes are locked.",
-  x:"Bounty announcement: the two required parts of the video, the prize, the deadline.",
+ {d:"2026-09-22", tags:[], launch:["Sisan Baniya launch"], quiet:["reddit"], posts:{
+  linkedin:"The brain drain post. Nepal exports its best engineers every year. This hackathon pays them to build the same quality product from home. Point at Sisan's launch as what staying and building looks like.",
+  x:"Sisan Baniya's launch, quote tweeted with the brain drain line. Count update.",
   ig:"Bounty explainer in three frames, link sticker.",
   reddit:QUIET}},
  {d:"2026-09-23", tags:[], posts:{
@@ -328,6 +346,12 @@ function postHTML(day,c,cls){
     ${q?`<span></span>`:`<input type="checkbox" data-k="${k(day.d,c)}" ${done?"checked":""} aria-label="${CH[c].name} live on ${fmt(day.d).dow} ${fmt(day.d).day}">`}
     <div><div class="ch" style="color:${CH[c].c}"><i style="background:${CH[c].c}"></i>${CH[c].name}</div><div class="txt">${esc(day.posts[c])}</div></div>
   </div>`;
+}
+const hasLaunch=day=>Array.isArray(day.launch)&&day.launch.length>0;
+/* launches first: they are the levers, and they carry the column border */
+function pillsHTML(day){
+  const rows=[...(day.launch||[]).map(t=>["lx",t]),...(day.events||[]).map(t=>["ev",t])];
+  return rows.length?`<div class="pills">${rows.map(([c,t])=>`<span class="pill ${c}">${esc(t)}</span>`).join("")}</div>`:"";
 }
 function tagsHTML(day){return day.tags.map(t=>`<span class="tag ${/Buildstation/.test(t)?"":"plain"}">${t}</span>`).join("");}
 
@@ -451,6 +475,7 @@ function renderToday(){
   const d=selected||today;
   let day=DAYS.find(x=>x.d===d);
   const el=document.getElementById("todayPanel");
+  el.classList.toggle("lever",!!day&&hasLaunch(day));
   if(!day){
     const first=DAYS[0], last=DAYS[DAYS.length-1];
     el.innerHTML=`<div class="head"><h2>${d<first.d?"The push starts Sun 13 Sep":"The push has ended"}</h2><span>${d<first.d?"Nothing scheduled today.":"Registration stays open till 12 Oct."}</span></div>`;
@@ -459,6 +484,7 @@ function renderToday(){
   const f=fmt(day.d), p=prog(day), isToday=day.d===today;
   el.innerHTML=`<div class="head"><h2>${isToday?"Going live today":"Selected day"}: ${f.dowL} ${f.day} ${f.mon}</h2><span>${p.n} of ${p.t} live</span>${isToday?"":`<button class="jump" id="backToday">Back to today</button>`}</div>
     ${day.tags.length?`<div class="tags">${tagsHTML(day)}</div>`:""}
+    ${pillsHTML(day)}
     <div class="posts">${Object.keys(day.posts).map(c=>postHTML(day,c,"post")).join("")}</div>`;
   bind(el);
   const b=el.querySelector("#backToday"); if(b) b.onclick=()=>{selected=null;renderAll();scrollBoardTo(today);};
@@ -468,9 +494,10 @@ function renderBoard(){
   const today=todayISO(), board=document.getElementById("board");
   board.innerHTML=DAYS.map(day=>{
     const f=fmt(day.d), p=prog(day);
-    return `<div class="col ${isBuild(day)?"build":""} ${day.d===today?"today":""} ${day.d<today?"past":""}" id="col-${day.d}">
+    return `<div class="col ${isBuild(day)?"build":""} ${hasLaunch(day)?"lever":""} ${day.d===today?"today":""} ${day.d<today?"past":""}" id="col-${day.d}">
       <div class="date"><b>${f.dow} ${f.day}<small>${f.mon}</small></b><span>${day.d===today?"today":p.n+" of "+p.t+" live"}</span></div>
       ${day.tags.length?`<div class="tags">${tagsHTML(day)}</div>`:""}
+      ${pillsHTML(day)}
       ${Object.keys(day.posts).map(c=>postHTML(day,c,"card")).join("")}
     </div>`;
   }).join("");
