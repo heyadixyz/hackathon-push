@@ -11,6 +11,7 @@
     --red:#C8102E; --red-soft:#FCEBEE;
     --li:#0A66C2; --li-soft:#E8F1FB; --x:#111; --x-soft:#EEEEEE; --ig:#C13584; --ig-soft:#FAE8F2; --rd:#FF4500; --rd-soft:#FFEEE6;
     --build:#7C3AED; --build-soft:#F1EBFD;
+    --em:#0F766E; --em-soft:#E4F3F0;
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
@@ -133,6 +134,7 @@
       <span><i style="background:var(--x)"></i>X</span>
       <span><i style="background:var(--ig)"></i>Instagram story</span>
       <span><i style="background:var(--rd)"></i>Reddit</span>
+      <span><i style="background:var(--em)"></i>Email</span>
       <span><i style="background:var(--build)"></i>Buildstation</span>
     </div>
   </div>
@@ -167,7 +169,8 @@ const CH = {
   linkedin:{name:"LinkedIn", c:"var(--li)", s:"var(--li-soft)"},
   x:{name:"X", c:"var(--x)", s:"var(--x-soft)"},
   ig:{name:"Instagram story", c:"var(--ig)", s:"var(--ig-soft)"},
-  reddit:{name:"Reddit", c:"var(--rd)", s:"var(--rd-soft)"}
+  reddit:{name:"Reddit", c:"var(--rd)", s:"var(--rd-soft)"},
+  email:{name:"Email", c:"var(--em)", s:"var(--em-soft)"}
 };
 const QUIET = "Comment day. Answer questions in your own threads. No new post.";
 const DAYS = [
@@ -205,7 +208,8 @@ const DAYS = [
   linkedin:"Myths that stop people registering. You need a team. You need Rust. You need to be in Kathmandu. You need a finished idea. Each answered in one line.",
   x:"Photo dump from Buildstation day four, number of builders, number of teams, current count.",
   ig:"What the founders told the teams, in three text frames over room photos.",
-  reddit:QUIET}},
+  reddit:QUIET,
+  email:"City mixer invites, segmented by city. Jhapa, Pokhara, Butwal. Registration link above the fold, mixer date below it."}},
  {d:"2026-09-20", tags:["Buildstation Demo Day"], quiet:["reddit"], posts:{
   linkedin:"Buildstation in numbers. Builders in the room, teams formed, what changed in the ideas since Wednesday, and Demo Day happening today.",
   x:"Live from Demo Day: one tweet per team as it presents. Short video of the best demo moment, captioned \"Registered on Monday. Demoed on Sunday.\"",
@@ -225,7 +229,8 @@ const DAYS = [
   linkedin:"Anybody Can Dev. Post the first episode (Anil Keshary Shah or Wangden Sherpa building an app in under three minutes). If he can, a CSIT student can.",
   x:"The reel itself, quote tweeted with \"Your turn.\" Count update.",
   ig:"Reel reshare, poll \"Could you do this in 3 minutes?\"",
-  reddit:"r/Nepal: the reel, framed as a banker learning blockchain, hackathon link in the body."}},
+  reddit:"r/Nepal: the reel, framed as a banker learning blockchain, hackathon link in the body.",
+  email:"Main broadcast. Past hackathon signups, Earn Nepal users, newsletter. Prizes, accelerator, Telegram link, how to start. Log sends, opens and clicks against tomorrow's delta."}},
  {d:"2026-09-24", tags:[], quiet:["reddit"], posts:{
   linkedin:"What a registrant gets from Superteam Nepal for the next three weeks: Co-working Fridays in five cities, weekly build streams, community call alphas, founder office hours, help finding a team.",
   x:"Second Swikar stream announcement plus the count.",
@@ -235,12 +240,14 @@ const DAYS = [
   linkedin:"The last stretch. Publish the exact count, the gap to 1000, and a direct ask to every reader to send the link to one person who builds.",
   x:"Hourly count updates through the day, each one a quote of the pinned Day 1 tweet.",
   ig:"Countdown to midnight, share sticker prompt \"send this to one builder.\"",
-  reddit:"r/ITNepal short post: \"We are X short of 1000 Nepali registrations. Closing the gap today.\""}},
+  reddit:"r/ITNepal short post: \"We are X short of 1000 Nepali registrations. Closing the gap today.\"",
+  email:"Two sends to current signups. Ideathon creator bounty in the morning, Cypherpunk Townhall invite in the evening."}},
  {d:"2026-09-26", tags:["Buffer day"], quiet:["reddit"], posts:{
   linkedin:"Either the 1000 announcement with the number in the hook and the Nepal flag, or the honest count and the commitment to hit it before 12 Oct.",
   x:"Same, plus thanks to Swikar, Sisan, and the Anybody Can Dev guests.",
   ig:"The number, full screen.",
-  reddit:QUIET}}
+  reddit:QUIET,
+  email:"Founder Mode Kit to current signups. Tools, starter repos, templates, office hours schedule."}}
 ];
 
 const KEY="hackathon-push-progress-v3";
