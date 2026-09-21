@@ -1,7 +1,7 @@
 {
- "nepal": 429,
- "total": 4914,
- "updatedAt": "2026-09-21T00:06:00.501919+00:00",
+ "nepal": 436,
+ "total": 4974,
+ "updatedAt": "2026-09-21T07:53:59.158263+00:00",
  "history": [
   [
    "2026-09-12",
@@ -166,28 +166,32 @@
   [
    "2026-09-21",
    429
+  ],
+  [
+   "2026-09-21",
+   436
   ]
  ],
  "countries": [
   {
    "name": "India",
-   "count": 944
+   "count": 948
   },
   {
    "name": "Nepal",
-   "count": 429
+   "count": 436
   },
   {
    "name": "Nigeria",
-   "count": 371
+   "count": 376
   },
   {
    "name": "United States",
-   "count": 316
+   "count": 317
   },
   {
    "name": "Brazil",
-   "count": 282
+   "count": 286
   },
   {
    "name": "Germany",
@@ -198,12 +202,12 @@
    "count": 209
   },
   {
-   "name": "Georgia",
-   "count": 141
+   "name": "Balkans",
+   "count": 142
   },
   {
-   "name": "Balkans",
-   "count": 140
+   "name": "Georgia",
+   "count": 141
   },
   {
    "name": "Turkey",
